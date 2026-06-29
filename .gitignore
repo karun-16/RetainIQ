@@ -1,36 +1,22 @@
-# Node
-node_modules/
-.next/
-
 # Python
 venv/
-backend/venv/
 __pycache__/
 *.pyc
 
-# Environment
-.env
-.env.local
-.env.*
-!.env.example
+# Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
 
-# IDE
-.vscode/
-.idea/
-
-# Logs
-*.log
+# Backend
+backend/.env
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Vercel
-.vercel/
-
-# Python cache
-.pytest_cache/
+# VS Code
+.vscode/
 
 # Build
-dist/
-build/
+*.tsbuildinfo
