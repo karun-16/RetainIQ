@@ -54,8 +54,8 @@ export default function LoginPage() {
     // Hardcoded demo credentials — safe for this internship/demo project.
     // Previous env-var approach failed due to a typo in .env.local
     // (EXT_PUBLIC_DEMO_EMAIL instead of NEXT_PUBLIC_DEMO_EMAIL).
-    const demoEmail = 'demo@retainiq.app';
-    const demoPassword = 'RetainIQ@Demo2024';
+    const demoEmail = 'demo@retainiq.app'; // hardcoded — no env var needed
+    const demoPassword = 'RetainIQ@Demo2024'; // hardcoded — no env var needed
 
     setDemoLoading(true);
     setError(null);
