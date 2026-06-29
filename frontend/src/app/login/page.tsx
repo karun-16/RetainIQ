@@ -1,16 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ShieldAlert, Mail, Lock, Loader2 } from 'lucide-react';
+import { ShieldAlert, Mail, Lock, Loader2, Rocket } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // If already authenticated, redirect straight to dashboard
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.replace('/dashboard');
+      }
+    };
+    checkSession();
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,14 +37,60 @@ export default function LoginPage() {
       });
 
       if (error) throw error;
-      
+
       router.push('/dashboard');
       router.refresh();
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+      const msg = err?.message || '';
+      if (msg.toLowerCase().includes('invalid login') || msg.toLowerCase().includes('invalid email') || msg.toLowerCase().includes('invalid credentials')) {
+        setError('Invalid email or password. Please try again.');
+      } else if (msg.toLowerCase().includes('email not confirmed')) {
+        setError('Please verify your email address before signing in.');
+      } else if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(msg || 'Failed to sign in. Please try again.');
+      }
       setLoading(false);
     }
   };
+
+  const handleDemoLogin = async () => {
+    const demoEmail = process.env.NEXT_PUBLIC_DEMO_EMAIL;
+    const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD;
+
+    if (!demoEmail || !demoPassword) {
+      setError('Demo account is not configured. Please contact the administrator.');
+      return;
+    }
+
+    setDemoLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+
+      if (error) throw error;
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.toLowerCase().includes('invalid login') || msg.toLowerCase().includes('invalid credentials')) {
+        setError('Demo account is unavailable. Please contact the administrator.');
+      } else if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError('Demo account is currently unavailable. Please try again later.');
+      }
+      setDemoLoading(false);
+    }
+  };
+
+  const isAnyLoading = loading || demoLoading;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -77,6 +136,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="input-field pl-10"
                   placeholder="you@company.com"
+                  disabled={isAnyLoading}
                 />
               </div>
             </div>
@@ -96,28 +156,62 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="input-field pl-10"
                   placeholder="••••••••"
+                  disabled={isAnyLoading}
                 />
               </div>
             </div>
 
-            <div>
+            <div className="space-y-3">
+              {/* Primary sign-in button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isAnyLoading}
                 className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
                     <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                    Signing in...
+                    Signing In...
                   </>
                 ) : (
-                  'Sign in to HR Portal'
+                  'Sign In'
+                )}
+              </button>
+
+              {/* Demo account button */}
+              <button
+                type="button"
+                disabled={isAnyLoading}
+                onClick={handleDemoLogin}
+                className="w-full flex justify-center items-center py-2.5 px-4 border border-primary rounded-lg shadow-sm text-sm font-medium text-primary bg-white hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {demoLoading ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                    Loading Demo...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="mr-2 h-4 w-4" />
+                    Try Demo Account
+                  </>
                 )}
               </button>
             </div>
-            
-            <div className="mt-6 text-center">
+
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{' '}
+                <Link
+                  href="/register"
+                  className="font-medium text-primary hover:text-primary-hover transition-colors"
+                >
+                  Create New Account
+                </Link>
+              </p>
+            </div>
+
+            <div className="mt-2 text-center">
               <p className="text-xs text-gray-500">
                 Authorized HR personnel only. Contact IT for access.
               </p>
