@@ -21,6 +21,13 @@ app = FastAPI(
     description="ML-powered HR Attrition Prevention Platform",
     version="1.0.0",
 )
+@app.get("/")
+def root():
+    return {
+        "message": "RetainIQ API is running 🚀",
+        "docs": "/docs",
+        "health": "/health"
+    }
 
 # ─── CORS ────────────────────────────────────────────────────────────────────
 
