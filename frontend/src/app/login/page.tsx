@@ -51,13 +51,11 @@ export default function LoginPage() {
   };
 
   const handleDemoLogin = async () => {
-    const demoEmail = process.env.NEXT_PUBLIC_DEMO_EMAIL;
-    const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD;
-
-    if (!demoEmail || !demoPassword) {
-      setError('Demo account is not configured. Please contact the administrator.');
-      return;
-    }
+    // Hardcoded demo credentials — safe for this internship/demo project.
+    // Previous env-var approach failed due to a typo in .env.local
+    // (EXT_PUBLIC_DEMO_EMAIL instead of NEXT_PUBLIC_DEMO_EMAIL).
+    const demoEmail = 'demo@retainiq.app';
+    const demoPassword = 'RetainIQ@Demo2024';
 
     setDemoLoading(true);
     setError(null);
