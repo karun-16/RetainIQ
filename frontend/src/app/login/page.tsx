@@ -147,7 +147,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="relative z-10">
-          <p className="text-xs text-slate-500">© 2025 RetainIQ · Predict. Prevent. Retain.</p>
+          <p className="text-xs text-slate-500">© 2026 RetainIQ · Predict. Prevent. Retain.</p>
         </div>
       </div>
 
